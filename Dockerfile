@@ -18,7 +18,7 @@ RUN ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-branding
 COPY ckanext/ckanext-schemas /usr/lib/ckan/venv/src/ckanext/ckanext-schemas
 RUN ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-schemas
 
-RUN ckan-pip3 install gunicorn flask_debugtoolbar
+RUN ckan-pip3 install gunicorn flask_debugtoolbar "Flask<2.2.0" "jinja2<3.1.0"
 
 COPY --chmod=+x entrypoint/custom-entrypoint.sh entrypoint/dev-entrypoint.sh /
 
