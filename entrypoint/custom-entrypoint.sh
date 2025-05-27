@@ -27,9 +27,6 @@ conf_set ckan.site_about "
 
 # Developers
 Source code available at [gitlab.com/gisdev.io/catalogue-tools4msp](https://gitlab.com/gisdev.io/catalogue-tools4msp).
-
-# Administrators
-Harvesting operations can be monitored at [/harvest](/harvest).
 "
 
 #ckanext-branding
