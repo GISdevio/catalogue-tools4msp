@@ -100,10 +100,13 @@ class SchemasPlugin(plugins.SingletonPlugin):
             pkg_dict["vocab_"+field] = data
 
         geojson = pkg_dict.get("spatial_geojson")
-        try:
-            geometry = json.loads(geojson)
-        except json.decoder.JSONDecodeError:
+        if not geojson:
             geometry = None
+        else:
+            try:
+                geometry = json.loads(geojson)
+            except json.decoder.JSONDecodeError:
+                geometry = None
         if geometry:
             shape = shapely.geometry.shape(geometry)
             minx, miny, maxx, maxy = shape.bounds
