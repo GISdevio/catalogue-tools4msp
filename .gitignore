@@ -1,3 +1,4 @@
 struttura.json
 *.xlsx
 *#
+.env
