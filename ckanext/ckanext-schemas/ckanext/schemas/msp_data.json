@@ -2129,6 +2129,22 @@
           "label": "Local - future - Low"
         }
       ]
+    },
+    {
+      "field_name": "clusters",
+      "preset": "multiple_checkbox",
+      "form_snippet": null,
+      "display_snippet": null,
+      "choices": [
+        {"value": "environment", "label": "Environment"},
+        {"value": "oceanographic-and-cc", "label": "Oceanographic and CC"},
+        {"value": "conservation", "label": "Conservation"},
+        {"value": "maritime-activities", "label": "Maritime Activities"},
+        {"value": "coastal-land-use-and-planning", "label": "Coastal Land Use and Planning"},
+        {"value": "socio-economic", "label": "Socio-Economic"},
+        {"value": "ecosystem-services", "label": "Ecosystem Services"},
+        {"value": "legal-governance-planning", "label": "Legal Governance Planning"}
+      ]
     }
   ],
   "resource_fields": [

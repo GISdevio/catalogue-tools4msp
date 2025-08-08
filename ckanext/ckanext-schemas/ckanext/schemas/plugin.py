@@ -1,10 +1,6 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckanext.schemas.views import scheming
-import ckanext.schemas.helpers as helpers
-import ckanext.schemas.logic.action.get
-from ckanext.scheming.plugins import _load_schemas as load_schemas
-
+import ckan.logic as logic
 from ckan.common import config
 
 from collections import defaultdict
@@ -12,19 +8,18 @@ import json
 import requests
 import shapely
 
+from ckanext.schemas.views import scheming
+import ckanext.schemas.helpers as helpers
+import ckanext.schemas.utils as utils
+from ckanext.scheming.plugins import _load_schemas as load_schemas
+
+# Import action modules
+import ckanext.schemas.logic.action.get
+import ckanext.schemas.logic.action.create
+import ckanext.schemas.logic.action.update
+
 CKAN_SOLR_URL = config.get('ckan.solr_url', 'http://solr:8983/solr/ckan')
 CKAN_SORL_SCHEMA = CKAN_SOLR_URL + '/schema'
-
-SCHEMA = load_schemas(
-    config.get('scheming.dataset_schemas').split(),
-    "dataset_type"
-)["msp-data"]
-
-CLUSTERS = defaultdict(list)
-for field in SCHEMA["dataset_fields"]:
-    if "cluster" in field:
-        cluster = field["cluster"]
-        CLUSTERS[cluster].append(field)
 
 class SchemasPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
@@ -116,19 +111,7 @@ class SchemasPlugin(plugins.SingletonPlugin):
             pkg_dict["maxy"] = maxy
             pkg_dict["spatial_geom"] = shape.wkt
 
-        pkg_dict["vocab_clusters"] = []
-        for cluster, fields in CLUSTERS.items():
-            for field in fields:
-                data = pkg_dict.get(field["field_name"])
-                if field.get("preset") == "multiple_checkbox":
-                    relevant = len(json.loads(data)) > 0
-                elif field.get("preset") == "radio":
-                    relevant = data == "yes"
-                else:
-                    relevant = data
-                if relevant:
-                    pkg_dict["vocab_clusters"].append(cluster)
-                    break
+        pkg_dict["vocab_clusters"] = utils.relevant_clusters(pkg_dict)
 
         return pkg_dict
 
@@ -141,8 +124,10 @@ class SchemasPlugin(plugins.SingletonPlugin):
 
     def get_actions(self):
         return {
-           'ckan_package_show':
-               ckanext.schemas.logic.action.get.ckan_package_show,
-           'package_show':
-               ckanext.schemas.logic.action.get.package_show,
+            'ckan_package_show': ckanext.schemas.logic.action.get.ckan_package_show,
+            'package_show': ckanext.schemas.logic.action.get.package_show,
+            'ckan_package_create': ckanext.schemas.logic.action.create.ckan_package_create,
+            'ckan_package_update': ckanext.schemas.logic.action.update.ckan_package_update,
+            'package_create': ckanext.schemas.logic.action.create.package_create,
+            'package_update': ckanext.schemas.logic.action.update.package_update,
         }
