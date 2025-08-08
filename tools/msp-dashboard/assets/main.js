@@ -1,5 +1,6 @@
 // CKAN API configuration
-const CKAN_API_BASE = '/api/3/action/';
+//const CKAN_API_BASE = '/api/3/action/';
+const CKAN_API_BASE = 'https://catalogue.tools4msp.eu/api/3/action/';
 const DATASETS_PER_PAGE = 1000;
 
 // Global data storage

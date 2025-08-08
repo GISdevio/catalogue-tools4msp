@@ -9,7 +9,9 @@
 	
 	# Proxy CKAN API requests to avoid CORS issues
 	handle /api/* {
-		reverse_proxy http://localhost:5000 {
+		reverse_proxy https://catalogue.tools4msp.eu {
+			header_up Host catalogue.tools4msp.eu
+			header_up X-Forwarded-Proto https
 		}
 	}
 	
