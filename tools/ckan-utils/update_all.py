@@ -24,15 +24,16 @@ while True:
     datasets = result['results']
     
     for ds in datasets:
-        # Trigger update (recomputes clusters via plugin)
-        patch_resp = requests.post(f"{ckan_url}/api/3/action/package_patch",
-                                 headers=headers, 
-                                 json={'id': ds['id']})
-        if patch_resp.json().get('success'):
+        # Trigger update (recomputes clusters via plugin) using package_patch with dummy clusters
+        update_resp = requests.post(f"{ckan_url}/api/3/action/package_patch",
+                                  headers=headers,
+                                  json={'id': ds['id'], 'clusters': []})
+        if update_resp.json().get('success'):
             print(f"✓ {ds['name']}")
             updated += 1
         else:
             print(f"✗ {ds['name']}")
+            print(update_resp.text)
     
     if len(datasets) < 100:
         break
