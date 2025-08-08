@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSP Dataset Dashboard</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MSP Dataset Dashboard</h1>
+            <p>Visualization of Marine Spatial Planning datasets from the CKAN catalogue</p>
+        </header>
+
+        <main>
+            <div class="loading" id="loading">
+                Loading datasets from CKAN API...
+            </div>
+
+            <div class="error" id="error" style="display: none;">
+                <p>Error loading data. Please check the console for details.</p>
+            </div>
+
+            <div class="dashboard" id="dashboard" style="display: none;">
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-datasets">0</span>
+                        <span class="stat-label">Total Datasets</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-clusters">0</span>
+                        <span class="stat-label">Clusters</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h2>Datasets by MSP Cluster</h2>
+                    <div id="cluster-chart"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+:8080 {
+	# Handle CORS preflight requests first
+	@cors_preflight {
+		method OPTIONS
+	}
+	respond @cors_preflight 204 {
+		close
+	}
+	
+	# Proxy CKAN API requests to avoid CORS issues
+	handle /api/* {
+		reverse_proxy http://localhost:5000 {
+		}
+	}
+	
+	# Serve static files
+	file_server
+	
+	# Add CORS headers to all responses
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type"
+	}
+}
