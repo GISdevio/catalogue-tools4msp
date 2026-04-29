@@ -1,13 +1,16 @@
 #!/bin/bash
 set -e
 
+# Run the custom entrypoint first
 /custom-entrypoint.sh
 
-conf="/etc/ckan/production.ini"
+conf="/srv/app/ckan.ini"
 
+# Enable debug mode for development
 crudini --set "$conf" DEFAULT debug "true"
 
-ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-branding
-ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-schemas
+# Re-run uv sync to ensure editable installs are properly linked even with host mounts
+uv sync --locked
 
+# Extensions are already installed in editable mode via uv sync during build
 exec "$@"

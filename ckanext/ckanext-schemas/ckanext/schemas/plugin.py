@@ -18,8 +18,11 @@ import ckanext.schemas.logic.action.get
 import ckanext.schemas.logic.action.create
 import ckanext.schemas.logic.action.update
 
-CKAN_SOLR_URL = config.get('ckan.solr_url', 'http://solr:8983/solr/ckan')
-CKAN_SORL_SCHEMA = CKAN_SOLR_URL + '/schema'
+def _get_solr_schema_url():
+    solr_url = config.get('ckan.solr_url', 'http://solr:8983/solr/ckan')
+    if solr_url and '://' in solr_url:
+        return solr_url + '/schema'
+    return None
 
 class SchemasPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
@@ -41,16 +44,25 @@ class SchemasPlugin(plugins.SingletonPlugin):
         toolkit.add_resource('fanstatic',
             'schemas')
 
-        for field_name in "minx miny maxx maxy".split():
-            response = requests.post(CKAN_SORL_SCHEMA, json={
-                "add-field": {
-                    "name": field_name,
-                    "type": "float",
-                    "indexed": True,
-                    "stored": True,
-                }
-            })
-            response.raise_for_status()
+        # Try to configure Solr schema if available
+        solr_schema_url = _get_solr_schema_url()
+        if solr_schema_url:
+            try:
+                for field_name in "minx miny maxx maxy".split():
+                    response = requests.post(solr_schema_url, json={
+                        "add-field": {
+                            "name": field_name,
+                            "type": "float",
+                            "indexed": True,
+                            "stored": True,
+                        }
+                    }, timeout=5)
+                    # Don't fail if solr is not available yet
+            except (requests.exceptions.RequestException, Exception) as e:
+                # Log error but don't fail startup
+                print(f"Warning: Could not configure Solr schema: {e}")
+        else:
+            print("Warning: Solr URL not configured or invalid")
 
     # IFacets
 

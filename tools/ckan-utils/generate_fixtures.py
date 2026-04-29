@@ -30,16 +30,33 @@ for field in schema['dataset_fields']:
             'multi': field.get('preset') == 'multiple_checkbox'
         })
 
-# Get org
-org_resp = requests.get(f"{ckan_url}/api/3/action/organization_show?id=test-msp-org")
-if org_resp.json().get('success'):
-    org_id = org_resp.json()['result']['id']
-else:
-    # Create org
-    org_data = {'name': 'test-msp-org', 'title': 'Test MSP Org'}
-    org_resp = requests.post(f"{ckan_url}/api/3/action/organization_create", 
-                           headers={'X-CKAN-API-Key': api_key}, json=org_data)
-    org_id = org_resp.json()['result']['id']
+# Create org (always create new one for simplicity)
+print("Creating test organization...")
+org_data = {'name': 'test-msp-org', 'title': 'Test MSP Org'}
+org_resp = requests.post(f"{ckan_url}/api/3/action/organization_create", 
+                       headers={'X-CKAN-API-Key': api_key}, json=org_data)
+try:
+    org_result = org_resp.json()
+    if not org_result.get('success'):
+        # If org already exists, try to get it
+        if 'already exists' in str(org_result.get('error', {})):
+            list_resp = requests.get(f"{ckan_url}/api/3/action/organization_list?all_fields=true")
+            orgs = list_resp.json()['result']
+            org_id = next((org['id'] for org in orgs if org['name'] == 'test-msp-org'), None)
+            if org_id:
+                print(f"Using existing organization with ID: {org_id}")
+            else:
+                print("Could not find existing organization")
+                exit(1)
+        else:
+            print(f"Failed to create organization: {org_result.get('error')}")
+            exit(1)
+    else:
+        org_id = org_result['result']['id']
+        print(f"Created organization with ID: {org_id}")
+except requests.exceptions.JSONDecodeError:
+    print(f"Failed to parse organization response: {org_resp.text}")
+    exit(1)
 
 # Generate datasets
 created = 0

@@ -1,0 +1,6 @@
+pyproject.toml
+ckan_dummy.egg-info/PKG-INFO
+ckan_dummy.egg-info/SOURCES.txt
+ckan_dummy.egg-info/dependency_links.txt
+ckan_dummy.egg-info/requires.txt
+ckan_dummy.egg-info/top_level.txt

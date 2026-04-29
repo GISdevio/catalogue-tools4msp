@@ -1,4 +1,6 @@
 struttura.json
 *.xlsx
 *#
-.env
+.venv/
+.egg-info/
+.python-version

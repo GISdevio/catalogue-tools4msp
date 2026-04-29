@@ -1,14 +1,26 @@
-version: "3"
-
 volumes:
   ckan_storage:
   pg_data:
   solr_data:
 
+networks:
+  webnet:
+  ckannet:
+    internal: true
+  solrnet:
+    internal: true
+  dbnet:
+    internal: true
+  redisnet:
+    internal: true
+
 x-common-ckan:
   &default-common-ckan
-  build: .
-  image: registry.gitlab.com/gisdev.io/ckan/main/ckan
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ghcr.io/gisdevio/catalogue-tools4msp:2.11
+  env_file: .env
   depends_on:
     db:
       condition: service_healthy
@@ -16,27 +28,44 @@ x-common-ckan:
       condition: service_healthy
     redis:
       condition: service_healthy
-    #datapusher:
-    #  condition: service_healthy
+  networks:
+    - webnet
+    - ckannet
+    - solrnet
+    - dbnet
+    - redisnet
   environment:
     &default-common-env-ckan
+    # Database
     CKAN_SQLALCHEMY_URL: postgresql://ckan:ckan@db/ckan
     CKAN_DATASTORE_WRITE_URL: postgresql://ckan:ckan@db/datastore
     CKAN_DATASTORE_READ_URL: postgresql://datastore_ro:datastore@db/datastore
+    # Search
     CKAN_SOLR_URL: http://solr:8983/solr/ckan
+    # Redis
     CKAN_REDIS_URL: redis://redis:6379/1
+    # DataPusher
     CKAN_DATAPUSHER_URL: http://datapusher:8800
-    CKAN_SITE_URL: http://ckan:5000
-    CKAN_SITE_URL_INTERNAL: http://ckan:5000
+    # Core settings
+    CKAN_SITE_URL: http://localhost:5000
     CKAN_MAX_UPLOAD_SIZE_MB: 1000
+    SECRET_KEY: "3f7a5d2e8c1b9a6f4d7e2a9c5b8f1e3d"
+    # Database passwords
     POSTGRES_PASSWORD: ckan
     DS_RO_PASS: datastore
-    WERKZEUG_DEBUG_PIN: 5000
-    GUNICORN_CMD_ARGS: "--workers=4"
+    # Custom settings
     DOMAINAREAS_URL: "https://api.tools4msp.eu/api/v2/domainareas/?format=json"
     CKAN_SMTP_SERVER: "email.ismar.cnr.it"
     CKAN_SMTP_STARTTLS: false
     CKAN_SMTP_MAIL_FROM: "catalogue4msp@ismar.cnr.it"
+    # CKAN 2.11 specific
+    CKAN__PLUGINS: "image_view text_view datatables_view datastore datapusher scheming_datasets branding schemas spatial_metadata spatial_query"
+    CKAN__DATAPUSHER__URL: http://datapusher:8800
+    CKAN__DATAPUSHER__CALLBACK_URL_BASE: http://ckan:5000
+    # Branding configuration
+    CKAN__BRANDING__FEATURED_CATEGORIES: "[]"
+    CKAN__BRANDING__FEATURED_DATASETS: "[]"
+    CKAN__BRANDING__FEATURED_GROUPS: "[]"
   volumes:
     - ckan_storage:/var/lib/ckan
 
@@ -45,8 +74,12 @@ services:
     << : *default-common-ckan
     profiles:
       - prod
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5000:5000"
 
@@ -57,37 +90,76 @@ services:
     hostname: ckan
     ports:
       - "5000:5000"
-    command: 'python -m pdb -c continue /usr/lib/ckan/venv/bin/ckan run --host 0.0.0.0 --passthrough-errors'
-    entrypoint: ["bash", "dev-entrypoint.sh"]
+    command: 'ckan run --host 0.0.0.0 --passthrough-errors'
+    entrypoint: ["/bin/bash", "/dev-entrypoint.sh"]
     tty: true
     stdin_open: true
     user: root
     volumes:
       - ckan_storage:/var/lib/ckan
-      - ./ckanext/ckanext-branding:/usr/lib/ckan/venv/src/ckanext/ckanext-branding
-      - ./ckanext/ckanext-schemas:/usr/lib/ckan/venv/src/ckanext/ckanext-schemas
+      # Extensions
+      - ./ckanext/ckanext-branding:/usr/lib/ckan/ckanext/ckanext-branding:z
+      - ./ckanext/ckanext-schemas:/usr/lib/ckan/ckanext/ckanext-schemas:z
 
   db:
-    image: registry.gitlab.com/gisdev.io/ckan/postgresql
+    image: docker.io/library/postgres:18-alpine
+    networks:
+      - dbnet
     environment:
-      DS_RO_PASS: datastore
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ckan
+      POSTGRES_DB: postgres
+      DS_RO_PASS: datastore
       PGDATA: /var/lib/postgresql/data/db
     volumes:
       - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "ckan"]
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   solr:
-    image: registry.gitlab.com/gisdev.io/ckan/solr
+    image: docker.io/ckan/ckan-solr:2.11-solr9
+    networks:
+      - solrnet
     volumes:
-      - solr_data:/opt/solr/server/solr/ckan/data
+      - solr_data:/var/solr
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
-    #ports:
-    #  - 8983:8983
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:6.2
+    image: docker.io/library/redis:6.2-alpine
+    networks:
+      - redisnet
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "-e", "QUIT"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  datapusher:
+    image: docker.io/ckan/ckan-base-datapusher:0.0.20
+    networks:
+      - ckannet
+      - dbnet
+    environment:
+      DATAPUSHER_MAX_CONTENT_LENGTH: 10485760
+      DATAPUSHER_CHUNK_SIZE: 16384
+      DATAPUSHER_CHUNK_INSERT_TIMEOUT: 5
+      DATAPUSHER_DOWNLOAD_TIMEOUT: 30
+      DATAPUSHER_SSL_VERIFY: False
+      DATAPUSHER_REWRITE_RESOURCES: True
+      DATAPUSHER_REWRITE_URL: http://ckan:5000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

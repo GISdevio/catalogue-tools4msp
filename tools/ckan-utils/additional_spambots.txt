@@ -1,0 +1,77 @@
+# Additional suspicious users from the production list
+
+# More gaming/entertainment spam
+askme66
+jessutarman
+jovianas2
+julian13
+mark01
+mark02
+mark03
+mark04
+mark05
+yatiningsih
+
+# Suspicious single names/patterns
+attard
+ayah
+burcu
+bwang
+caca
+crich
+dians201
+dians202
+dians203
+dians204
+dians205
+dians206
+eliyanaahri
+febridrianto
+fghj
+hngnh
+itil
+jkeurte
+koigamesseru
+mario
+sasa
+sanjoyroy
+
+# More numbered/coded usernames
+dan_83
+dians201
+dians202
+dians203
+dians204
+dians205
+dians206
+
+# Generic/test looking names
+beang
+ceeang  
+deeang
+eeeang
+fghj
+ghezzo
+seeang
+yeeang
+
+# Suspicious entertainment/adult content
+eliyanaahri
+jovianas2
+kucingungu
+pagianime
+rose
+xlauraxx1
+
+# More pattern-based accounts that look automated
+andrewbutstay
+aqsin
+bwang
+crich
+elida321
+fatete
+gurte
+jatete
+matete
+qatete
+tatete

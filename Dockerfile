@@ -1,30 +1,34 @@
-FROM registry.gitlab.com/gisdev.io/ckan/ckan:dev-v2-9-gisdevio
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm AS base
 
-USER root
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -qy crudini
+RUN rm -f /etc/apt/apt.conf.d/docker-clean
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends \
+        crudini \
+        git \
+        postgresql-client
 
-ARG CKANEXT_SCHEMING_VERSION=handle-empty-multiple_checkbox # release-3.0.0
-RUN ckan-pip3 --no-cache install git+https://github.com/frafra/ckanext-scheming.git@${CKANEXT_SCHEMING_VERSION}
+WORKDIR /usr/lib/ckan
 
-ARG CKANEXT_SPATIAL_VERSION=v2.0.0
-RUN wget -q https://raw.githubusercontent.com/ckan/ckanext-spatial/${CKANEXT_SPATIAL_VERSION}/requirements.txt -O requirements-ckanext-spatial.txt && \
-    ckan-pip3 --no-cache install -r requirements-ckanext-spatial.txt && \
-    ckan-pip3 --no-cache install git+https://github.com/ckan/ckanext-spatial.git@${CKANEXT_SPATIAL_VERSION}
+COPY ckanext/ ckanext/
+COPY dummy/ dummy/
+COPY pyproject.toml uv.lock ./
 
-COPY ckanext/ckanext-branding /usr/lib/ckan/venv/src/ckanext/ckanext-branding
-RUN ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-branding
+RUN --mount=type=cache,sharing=locked,target=/root/.cache/uv \
+    uv sync --locked --no-dev
 
-COPY ckanext/ckanext-schemas /usr/lib/ckan/venv/src/ckanext/ckanext-schemas
-RUN ckan-pip3 install -e /usr/lib/ckan/venv/src/ckanext/ckanext-schemas
+COPY entrypoint/custom-entrypoint.sh entrypoint/dev-entrypoint.sh /
+RUN chmod +x /custom-entrypoint.sh /dev-entrypoint.sh
 
-RUN ckan-pip3 install gunicorn flask_debugtoolbar "Flask<2.2.0" "jinja2<3.1.0"
+ENV CKAN_HOME=/usr/lib/ckan
+ENV CKAN_VENV=$CKAN_HOME/.venv
+ENV CKAN_CONFIG=$CKAN_VENV/lib/python3.10/site-packages/ckan/config
+ENV CKAN_INI=/srv/app/ckan.ini
+ENV CKAN_STORAGE_PATH=/var/lib/ckan
 
-COPY --chmod=+x entrypoint/custom-entrypoint.sh entrypoint/dev-entrypoint.sh /
+RUN mkdir -p $CKAN_STORAGE_PATH/webassets/.webassets-cache
 
-ENV CKAN_INI=/etc/ckan/production.ini
+ENV PATH="$CKAN_VENV/bin:$PATH"
 
-USER ckan
-RUN mkdir -p /var/lib/ckan/webassets/.webassets-cache
 ENTRYPOINT ["/bin/bash", "/custom-entrypoint.sh"]
-CMD ["gunicorn", "--chdir", "/usr/lib/ckan/venv/src/ckan", "wsgi:application", "-b", "0.0.0.0:5000"]
+CMD ["ckan", "run", "--host", "0.0.0.0"]

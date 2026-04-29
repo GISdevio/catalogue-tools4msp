@@ -1,5 +1,4 @@
 import json
-from six import text_type
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 from ckan.logic import NotFound
@@ -17,6 +16,8 @@ def get_featured_categories():
 
     '''
     value = config.get('ckan.branding.featured_categories', '[]')
+    if value == '':
+        value = '[]'
     try:
         value = json.loads(value)
     except ValueError:
@@ -34,6 +35,8 @@ def get_featured_datasets():
 
     '''
     value = config.get('ckan.branding.featured_datasets', '[]')
+    if value == '':
+        value = '[]'
     try:
         value = json.loads(value)
     except ValueError:
@@ -111,8 +114,22 @@ def branding_list_config(value, context):
 
 class BrandingPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IConfigDeclaration)
     plugins.implements(plugins.ITemplateHelpers)
 
+
+    # IConfigDeclaration
+    
+    def declare_config_options(self, declaration, key):
+        declaration.declare(key.ckan.branding.featured_categories, "[]").set_description(
+            "JSON list of featured categories for homepage"
+        )
+        declaration.declare(key.ckan.branding.featured_datasets, "[]").set_description(
+            "JSON list of featured datasets for homepage"
+        )
+        declaration.declare(key.ckan.branding.featured_groups, "[]").set_description(
+            "JSON list of featured groups for homepage"
+        )
 
     # IConfigurer
 
@@ -124,10 +141,11 @@ class BrandingPlugin(plugins.SingletonPlugin):
 
     def update_config_schema(self, schema):
         ignore_missing = toolkit.get_validator('ignore_missing')
+        unicode_safe = toolkit.get_validator('unicode_safe')
         schema.update({
-            'ckan.branding.featured_categories': [ignore_missing, text_type, branding_list_config],
-            'ckan.branding.featured_datasets': [ignore_missing, text_type, branding_list_config],
-            'ckan.branding.featured_groups': [ignore_missing, text_type, branding_simple_list_config],
+            'ckan.branding.featured_categories': [ignore_missing, unicode_safe, branding_list_config],
+            'ckan.branding.featured_datasets': [ignore_missing, unicode_safe, branding_list_config],
+            'ckan.branding.featured_groups': [ignore_missing, unicode_safe, branding_simple_list_config],
         })
         return schema
 

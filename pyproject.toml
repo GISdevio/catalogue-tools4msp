@@ -1,0 +1,24 @@
+[project]
+name = "catalogue-tools4msp"
+version = "0.1.0"
+description = "CKAN data portal for tools4msp"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ckan-dummy",
+    "ckanext-branding",
+    "ckanext-schemas",
+    "ckanext-scheming==3.0.0",
+    "ckanext-spatial",
+    "gunicorn",
+    "flask-debugtoolbar",
+]
+
+[tool.uv.workspace]
+members = ["dummy/*"]
+
+[tool.uv.sources]
+ckan-dummy = { workspace = true }
+ckanext-branding = { path = "./ckanext/ckanext-branding", editable = true }
+ckanext-schemas = { path = "./ckanext/ckanext-schemas", editable = true }
+ckanext-spatial = { git = "https://github.com/ckan/ckanext-spatial", branch = "master" }

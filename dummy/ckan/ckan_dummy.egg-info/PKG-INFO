@@ -1,0 +1,75 @@
+Metadata-Version: 2.4
+Name: ckan-dummy
+Version: 0.1.0
+Summary: Extend and replace CKAN dependencies
+Requires-Python: >=3.10
+Requires-Dist: alembic==1.13.2
+Requires-Dist: argparse>=1.4.0
+Requires-Dist: async-timeout==4.0.3
+Requires-Dist: babel==2.15.0
+Requires-Dist: bleach==6.1.0
+Requires-Dist: blinker==1.8.2
+Requires-Dist: cachelib==0.13.0
+Requires-Dist: certifi==2024.7.4
+Requires-Dist: charset-normalizer==3.3.2
+Requires-Dist: ckantoolkit>=0.0.7
+Requires-Dist: click==8.1.7
+Requires-Dist: cython==0.29.36; python_full_version < "3.9"
+Requires-Dist: cython>=3.2.4
+Requires-Dist: dominate==2.9.1
+Requires-Dist: feedgen==1.0.0
+Requires-Dist: flask==3.0.3
+Requires-Dist: flask-babel==4.0.0
+Requires-Dist: flask-login==0.6.3
+Requires-Dist: flask-session==0.8.0
+Requires-Dist: flask-wtf==1.2.1
+Requires-Dist: geojson==3.1.0
+Requires-Dist: greenlet==3.0.3
+Requires-Dist: idna==3.7
+Requires-Dist: importlib-metadata==8.0.0
+Requires-Dist: itsdangerous==2.2.0
+Requires-Dist: jinja2==3.1.4
+Requires-Dist: lxml==5.2.2
+Requires-Dist: mako==1.3.5
+Requires-Dist: markdown==3.6
+Requires-Dist: markupsafe==2.1.5
+Requires-Dist: msgspec==0.18.6
+Requires-Dist: mypy==1.10.1
+Requires-Dist: mypy-extensions==1.0.0
+Requires-Dist: owslib==0.31.0; python_full_version < "3.10"
+Requires-Dist: owslib==0.32.0; python_full_version >= "3.10"
+Requires-Dist: packaging==24.1
+Requires-Dist: passlib==1.7.4
+Requires-Dist: polib==1.2.0
+Requires-Dist: psycopg2==2.9.9
+Requires-Dist: pyjwt==2.8.0
+Requires-Dist: pyparsing==3.1.2
+Requires-Dist: pyproj==2.6.1; python_full_version < "3.9"
+Requires-Dist: pyproj==3.6.1; python_full_version >= "3.9"
+Requires-Dist: pysolr==3.9.0
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: python-magic==0.4.27
+Requires-Dist: pytz==2024.1
+Requires-Dist: pyyaml==6.0.1
+Requires-Dist: redis==5.0.7
+Requires-Dist: requests==2.32.3
+Requires-Dist: rq==1.16.2
+Requires-Dist: setuptools<46
+Requires-Dist: shapely==2.0.7
+Requires-Dist: simplejson==3.19.2
+Requires-Dist: six==1.16.0
+Requires-Dist: sqlalchemy2-stubs==0.0.2a38
+Requires-Dist: sqlalchemy[mypy]==1.4.52
+Requires-Dist: sqlparse==0.5.0
+Requires-Dist: tomli==2.0.1
+Requires-Dist: typing-extensions==4.12.2
+Requires-Dist: tzlocal==5.2
+Requires-Dist: urllib3==2.2.2
+Requires-Dist: watchdog==4.0.1
+Requires-Dist: webassets==2.0
+Requires-Dist: webencodings==0.5.1
+Requires-Dist: werkzeug[watchdog]==3.0.3
+Requires-Dist: wheel>=0.47.0
+Requires-Dist: wtforms==3.1.2
+Requires-Dist: zipp==3.19.2
+Requires-Dist: zope-interface==6.4.post2

@@ -1,9 +1,19 @@
 #!/bin/bash
 set -e
 
-/ckan-entrypoint.sh
+# CKAN 2.11 doesn't have a standard entrypoint, we'll configure directly
+echo "Configuring CKAN 2.11..."
 
-conf="/etc/ckan/production.ini"
+
+conf="/srv/app/ckan.ini"
+
+# Generate config if it doesn't exist
+if [ ! -f "$conf" ]; then
+    echo "Generating CKAN config file..."
+    mkdir -p "$(dirname "$conf")"
+    ckan generate config "$conf"
+fi
+
 function conf_set() { crudini --set "$conf" app:main "$@"; }
 function conf_get() { crudini --get "$conf" app:main "$@"; }
 function conf_set_list() {
@@ -15,7 +25,7 @@ function conf_set_list() {
 }
 
 #ckan
-crudini --set "$conf" DEFAULT debug "false"
+conf_set debug "false"
 conf_set ckan.site_title "Tools4MSP"
 conf_set ckan.site_description "This is the portal of the catalogue-tools4msp project."
 conf_set ckan.site_logo "/logo.png"
@@ -36,9 +46,13 @@ conf_set_list ckan.plugins branding
 conf_set_list ckan.plugins schemas
 conf_set scheming.dataset_schemas "ckanext.schemas:custom_schema.yaml ckanext.schemas:msp_data.json ckanext.schemas:msp_portal.json ckanext.schemas:msp_tool.json"
 #conf_set ckan.default.package_type "msp-data" # CKAN > 2.9
-DOMAINAREAS_PATH="/usr/lib/ckan/domainareas.json"
-wget -nv "$DOMAINAREAS_URL" -O "$DOMAINAREAS_PATH"
-conf_set ckan.domainareas_path "$DOMAINAREAS_PATH"
+DOMAINAREAS_PATH="/var/lib/ckan/domainareas.json"
+if wget -nv "$DOMAINAREAS_URL" -O "$DOMAINAREAS_PATH" 2>/dev/null; then
+    conf_set ckan.domainareas_path "$DOMAINAREAS_PATH"
+    echo "Downloaded domain areas to $DOMAINAREAS_PATH"
+else
+    echo "Warning: Could not download domain areas from $DOMAINAREAS_URL"
+fi
 
 #ckanext-scheming
 conf_set_list ckan.plugins scheming_datasets
@@ -51,8 +65,6 @@ conf_set ckan.solr_url "$CKAN_SOLR_URL"
 
 #datapusher
 conf_set_list ckan.plugins datastore datapusher
-conf_set ckan.datapusher.callback_url_base "$CKAN_SITE_URL_INTERNAL"
-ckan datastore set-permissions | psql "$CKAN_SQLALCHEMY_URL"
-(sleep 1m && ckan datapusher submit -y) &
+# Datastore permissions will be set when database is ready
 
 exec "$@"

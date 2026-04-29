@@ -1,0 +1,7 @@
+pyproject.toml
+setup.py
+psycopg2.egg-info/PKG-INFO
+psycopg2.egg-info/SOURCES.txt
+psycopg2.egg-info/dependency_links.txt
+psycopg2.egg-info/requires.txt
+psycopg2.egg-info/top_level.txt

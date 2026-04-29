@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: psycopg2
+Version: 2.9.9
+Summary: Dummy psycopg2 to force binary installation
+Requires-Python: >=3.10
+Requires-Dist: psycopg2-binary==2.9.9
