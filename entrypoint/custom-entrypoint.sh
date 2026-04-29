@@ -25,6 +25,7 @@ function conf_set_list() {
 }
 
 #ckan
+conf_set ckan.plugins "image_view text_view datatables_view"
 conf_set debug "false"
 conf_set ckan.site_title "Tools4MSP"
 conf_set ckan.site_description "This is the portal of the catalogue-tools4msp project."
@@ -63,8 +64,8 @@ conf_set_list ckan.plugins spatial_metadata spatial_query
 conf_set ckanext.spatial.search_backend solr-bbox
 conf_set ckan.solr_url "$CKAN_SOLR_URL"
 
-#datapusher
-conf_set_list ckan.plugins datastore datapusher
+#xloader
+conf_set_list ckan.plugins datastore xloader
 # Datastore permissions will be set when database is ready
 
 exec "$@"

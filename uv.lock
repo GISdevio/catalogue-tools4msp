@@ -95,6 +95,7 @@ dependencies = [
     { name = "ckanext-schemas" },
     { name = "ckanext-scheming" },
     { name = "ckanext-spatial" },
+    { name = "ckanext-xloader" },
     { name = "flask-debugtoolbar" },
     { name = "gunicorn" },
 ]
@@ -106,6 +107,7 @@ requires-dist = [
     { name = "ckanext-schemas", editable = "ckanext/ckanext-schemas" },
     { name = "ckanext-scheming", specifier = "==3.0.0" },
     { name = "ckanext-spatial", git = "https://github.com/ckan/ckanext-spatial?branch=master" },
+    { name = "ckanext-xloader" },
     { name = "flask-debugtoolbar" },
     { name = "gunicorn" },
 ]
@@ -374,6 +376,18 @@ sdist = { url = "https://files.pythonhosted.org/packages/4b/0a/3bbc576fd37e1e10b
 name = "ckanext-spatial"
 version = "2.3.1"
 source = { git = "https://github.com/ckan/ckanext-spatial?branch=master#01f41a9c39ac6ec823e76c4a5a313b8724e519a0" }
+
+[[package]]
+name = "ckanext-xloader"
+version = "2.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c3/c6/16656a11ac3312b415cdb8f221d2134577131273042077f9c66a07952a84/ckanext_xloader-2.3.0.tar.gz", hash = "sha256:89a631ac795e8d31c583d05b196d0078597eac039c54659a5d12e068864a98ac", size = 95583, upload-time = "2026-03-05T10:04:38.86Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/74/bece727f2985fe42e6e4d3fd4d2d48c1f643b129bab5ecd0d6d311f6810e/ckanext_xloader-2.3.0-py3-none-any.whl", hash = "sha256:be3d90d68256ce64f8e80a890fab7cc1ed2e6b7cba167dcd2cc9d2043f0ef1d5", size = 95806, upload-time = "2026-03-05T10:04:37.534Z" },
+]
 
 [[package]]
 name = "ckantoolkit"

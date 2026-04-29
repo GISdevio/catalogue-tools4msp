@@ -37,31 +37,23 @@ x-common-ckan:
   environment:
     &default-common-env-ckan
     # Database
-    CKAN_SQLALCHEMY_URL: postgresql://ckan:ckan@db/ckan
-    CKAN_DATASTORE_WRITE_URL: postgresql://ckan:ckan@db/datastore
-    CKAN_DATASTORE_READ_URL: postgresql://datastore_ro:datastore@db/datastore
+    CKAN_SQLALCHEMY_URL: postgresql://ckan:${POSTGRES_PASSWORD:-ckan}@db/ckan
+    CKAN_DATASTORE_WRITE_URL: postgresql://ckan:${POSTGRES_PASSWORD:-ckan}@db/datastore
+    CKAN_DATASTORE_READ_URL: postgresql://datastore_ro:${DS_RO_PASS:-datastore}@db/datastore
     # Search
     CKAN_SOLR_URL: http://solr:8983/solr/ckan
     # Redis
     CKAN_REDIS_URL: redis://redis:6379/1
-    # DataPusher
-    CKAN_DATAPUSHER_URL: http://datapusher:8800
+    # Xloader
+    CKANEXT__XLOADER__JOBS_DB__URI: postgresql://ckan:ckan@db/datastore
     # Core settings
     CKAN_SITE_URL: http://localhost:5000
     CKAN_MAX_UPLOAD_SIZE_MB: 1000
-    SECRET_KEY: "3f7a5d2e8c1b9a6f4d7e2a9c5b8f1e3d"
-    # Database passwords
-    POSTGRES_PASSWORD: ckan
-    DS_RO_PASS: datastore
     # Custom settings
     DOMAINAREAS_URL: "https://api.tools4msp.eu/api/v2/domainareas/?format=json"
     CKAN_SMTP_SERVER: "email.ismar.cnr.it"
     CKAN_SMTP_STARTTLS: false
     CKAN_SMTP_MAIL_FROM: "catalogue4msp@ismar.cnr.it"
-    # CKAN 2.11 specific
-    CKAN__PLUGINS: "image_view text_view datatables_view datastore datapusher scheming_datasets branding schemas spatial_metadata spatial_query"
-    CKAN__DATAPUSHER__URL: http://datapusher:8800
-    CKAN__DATAPUSHER__CALLBACK_URL_BASE: http://ckan:5000
     # Branding configuration
     CKAN__BRANDING__FEATURED_CATEGORIES: "[]"
     CKAN__BRANDING__FEATURED_DATASETS: "[]"
@@ -107,9 +99,9 @@ services:
       - dbnet
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ckan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ckan}
       POSTGRES_DB: postgres
-      DS_RO_PASS: datastore
+      DS_RO_PASS: ${DS_RO_PASS:-datastore}
       PGDATA: /var/lib/postgresql/data/db
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -144,22 +136,29 @@ services:
       timeout: 5s
       retries: 5
 
-  datapusher:
-    image: docker.io/ckan/ckan-base-datapusher:0.0.20
+  worker:
+    << : *default-common-ckan
+    command: 'ckan jobs worker'
+    profiles:
+      - prod
     networks:
       - ckannet
       - dbnet
-    environment:
-      DATAPUSHER_MAX_CONTENT_LENGTH: 10485760
-      DATAPUSHER_CHUNK_SIZE: 16384
-      DATAPUSHER_CHUNK_INSERT_TIMEOUT: 5
-      DATAPUSHER_DOWNLOAD_TIMEOUT: 30
-      DATAPUSHER_SSL_VERIFY: False
-      DATAPUSHER_REWRITE_RESOURCES: True
-      DATAPUSHER_REWRITE_URL: http://ckan:5000
+      - redisnet
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
+  worker-dev:
+    << : *default-common-ckan
+    command: 'ckan jobs worker'
+    profiles:
+      - dev
+    networks:
+      - ckannet
+      - dbnet
+      - redisnet
+    volumes:
+      - ckan_storage:/var/lib/ckan
+      # Extensions
+      - ./ckanext/ckanext-branding:/usr/lib/ckan/ckanext/ckanext-branding:z
+      - ./ckanext/ckanext-schemas:/usr/lib/ckan/ckanext/ckanext-schemas:z
+    restart: unless-stopped

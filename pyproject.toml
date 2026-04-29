@@ -10,6 +10,7 @@ dependencies = [
     "ckanext-schemas",
     "ckanext-scheming==3.0.0",
     "ckanext-spatial",
+    "ckanext-xloader",
     "gunicorn",
     "flask-debugtoolbar",
 ]

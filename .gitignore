@@ -4,3 +4,4 @@ struttura.json
 .venv/
 .egg-info/
 .python-version
+.env
